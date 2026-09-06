@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solflare Wallet - Chrome Web Store (Local Copy)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Google Sans", Roboto, Arial, sans-serif;
+      background: #fff;
+      color: #202124;
+      line-height: 1.5;
+    }
+    .header {
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 100;
+      border-bottom: 1px solid #e8eaed;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      padding: 8px 24px;
+      gap: 16px;
+      height: 64px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #5f6368;
+      flex-shrink: 0;
+    }
+    .logo img {
+      width: 32px;
+      height: 32px;
+    }
+    .logo span {
+      font-size: 18px;
+      font-weight: 500;
+      color: #5f6368;
+      white-space: nowrap;
+    }
+    .search-box {
+      flex: 1;
+      max-width: 520px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .search-box form {
+      width: 100%;
+      margin: 0;
+    }
+    .search-box input {
+      width: 100%;
+      height: 44px;
+      padding: 0 16px 0 48px;
+      border: 1px solid #dadce0;
+      border-radius: 24px;
+      font-size: 14px;
+      outline: none;
+      background: #f1f3f4;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .search-box input:focus {
+      background: #fff;
+      box-shadow: 0 1px 6px rgba(32,33,36,0.28);
+      border-color: transparent;
+    }
+    .search-box .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      opacity: 0.55;
+      pointer-events: none;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #5f6368;
+    }
+    .icon-btn:hover {
+      background: #f1f3f4;
+    }
+    .sign-in {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 8px 22px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-left: 4px;
+    }
+    .sign-in:hover {
+      background: #1765cc;
+    }
+    .header-tabs {
+      display: flex;
+      padding: 0 24px;
+      gap: 0;
+      border-bottom: 1px solid transparent;
+    }
+    .header-tabs a {
+      text-decoration: none;
+      color: #5f6368;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 12px 16px;
+      position: relative;
+      border-bottom: 3px solid transparent;
+    }
+    .header-tabs a:hover {
+      background: #f8f9fa;
+    }
+    .header-tabs a.active {
+      color: #1a73e8;
+      border-bottom-color: #1a73e8;
+    }
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .title-left {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    .ext-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 12px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .ext-icon img {
+      width: 64px;
+      height: 64px;
+      display: block;
+      object-fit: cover;
+    }
+    .title-info h1 {
+      font-size: 28px;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: #5f6368;
+      flex-wrap: wrap;
+    }
+    .meta a { color: #1a73e8; text-decoration: none; }
+    .rating { color: #5f6368; }
+    .add-btn {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .add-btn:hover {
+      background: #1765cc;
+    }
+    /* Modal / Popover */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(32,33,36,0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.28);
+      overflow: hidden;
+      animation: modalIn 0.2s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.96) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 12px;
+    }
+    .modal-header h3 {
+      font-size: 20px;
+      font-weight: 500;
+    }
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 22px;
+      color: #5f6368;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-close:hover {
+      background: #f1f3f4;
+    }
+    .modal-body {
+      padding: 8px 24px 24px;
+      font-size: 14px;
+      color: #3c4043;
+      line-height: 1.55;
+    }
+    .modal-body ol {
+      margin: 16px 0 20px 20px;
+    }
+    .modal-body li {
+      margin-bottom: 12px;
+    }
+    .modal-body code {
+      background: #f1f3f4;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: "Roboto Mono", monospace;
+    }
+    .modal-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1a73e8;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      margin-top: 4px;
+    }
+    .modal-download:hover {
+      background: #1765cc;
+    }
+    .modal-note {
+      margin-top: 16px;
+      padding: 12px 14px;
+      background: #fef7e0;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #5f6368;
+    }
+    .tags {
+      display: flex;
+      gap: 8px;
+      margin: 16px 0 24px;
+      flex-wrap: wrap;
+    }
+    .tag {
+      background: #f1f3f4;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      color: #3c4043;
+    }
+    .hero {
+      background: transparent;
+      border-radius: 0;
+      padding: 0;
+      text-align: center;
+      margin-bottom: 40px;
+      position: relative;
+    }
+    .carousel {
+      position: relative;
+      max-width: 640px;
+      margin: 0 auto 16px;
+    }
+    .main-preview {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+      background: #0a0a0a;
+      aspect-ratio: 16 / 10;
+      position: relative;
+    }
+    .main-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.35s ease;
+    }
+    .main-preview img.fade-out {
+      opacity: 0;
+    }
+    .nav-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.92);
+      border: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #202124;
+      z-index: 10;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .nav-arrow:hover {
+      background: #fff;
+      transform: translateY(-50%) scale(1.06);
+    }
+    .nav-arrow.prev { left: -20px; }
+    .nav-arrow.next { right: -20px; }
+    .thumbs {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .thumb {
+      width: 72px;
+      height: 45px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: border-color 0.2s, opacity 0.2s;
+      opacity: 0.75;
+    }
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .thumb.active {
+      border-color: #1a73e8;
+      opacity: 1;
+    }
+    .thumb:hover {
+      opacity: 1;
+    }
+    .section {
+      margin-bottom: 40px;
+    }
+    .section h2 {
+      font-size: 22px;
+      font-weight: 400;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    .overview p {
+      margin-bottom: 12px;
+      font-size: 15px;
+      color: #3c4043;
+    }
+    .features {
+      margin-top: 20px;
+    }
+    .feature {
+      margin-bottom: 16px;
+    }
+    .feature strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 15px;
+    }
+    .feature p {
+      font-size: 14px;
+      color: #5f6368;
+    }
+    .details-grid {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 12px 24px;
+      font-size: 14px;
+    }
+    .details-grid dt { color: #5f6368; }
+    .details-grid dd { color: #202124; }
+    .privacy {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 14px;
+    }
+    .privacy ul {
+      margin: 12px 0 0 20px;
+    }
+    .related {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .related-card {
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .related-icon {
+      width: 48px;
+      height: 48px;
+      background: #f1f3f4;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+    .related-card h3 {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .related-card p {
+      font-size: 12px;
+      color: #5f6368;
+    }
+    .footer {
+      text-align: center;
+      padding: 40px 24px;
+      color: #5f6368;
+      font-size: 13px;
+      border-top: 1px solid #e8eaed;
+      margin-top: 40px;
+    }
+    .local-badge {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      background: #202124;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      z-index: 999;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  
+
+
+  <!-- Install Tutorial Modal -->
+  <div class="modal-overlay" id="installModal" onclick="if(event.target===this)closeInstallModal()">
+    <div class="modal" role="dialog" aria-labelledby="installTitle">
+      <div class="modal-header">
+        <h3 id="installTitle">Add Solflare Wallet to Chrome</h3>
+        <button class="modal-close" onclick="closeInstallModal()" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom:4px;">Install the extension manually with these steps:</p>
+
+        <ol>
+          <li>
+            <strong>Download</strong> the extension package.<br>
+            <a class="modal-download" href="./solflare_2.35.2_0.zip" download="solflare_2.35.2_0.zip" style="margin-top:10px;">
+              Download extension
+            </a>
+          </li>
+
+          <li style="margin-top:18px;">
+            <strong>Extract</strong> the downloaded file (right-click → Extract / Unzip).
+          </li>
+
+          <li style="margin-top:18px;">
+            Open the Extensions page. You can do this in two ways:
+            <ul style="margin:10px 0 0 4px; padding-left:18px; list-style:disc;">
+              <li style="margin-bottom:10px;">
+                Type <code>chrome://extensions</code> into the address bar (or into the search bar above) and press Enter.
+              </li>
+              <li>
+                Or go via the menu:<br>
+                At the top right, select More
+                <img src="https://lh3.googleusercontent.com/E2q6Vj9j60Dw0Z6NZFEx5vSB9yoZJp7C8suuvQXVA_2weMCXstGD7JEvNrzX3wuQrPtL=h36" height="18" alt="More" style="vertical-align:middle;margin:0 2px;">
+                <img src="https://lh3.googleusercontent.com/3_l97rr0GvhSP2XV5OoCkV2ZDTIisAOczrSdzNCBxhIKWrjXjHucxNwocghoUa39gw=h36" height="18" alt="and then" style="vertical-align:middle;margin:0 2px;">
+                <strong>Extensions</strong>
+                <img src="https://lh3.googleusercontent.com/3_l97rr0GvhSP2XV5OoCkV2ZDTIisAOczrSdzNCBxhIKWrjXjHucxNwocghoUa39gw=h36" height="18" alt="and then" style="vertical-align:middle;margin:0 2px;">
+                <strong>Manage extensions</strong>.
+              </li>
+            </ul>
+          </li>
+
+          <li style="margin-top:18px;">
+            At the top right of the Extensions page, turn on <strong>Developer mode</strong>.
+          </li>
+
+          <li style="margin-top:18px;">
+            Click <strong>Load unpacked</strong> and select the extracted folder,<br>
+            or simply <strong>drag and drop</strong> the extracted folder onto the page.
+          </li>
+        </ol>
+
+        <p style="margin-top:20px; font-size:13px; color:#5f6368;">
+          Need more help?
+          <a href="https://support.google.com/chrome_webstore/answer/2664769?hl=en" style="color:#1a73e8; text-decoration:none;">
+            Learn how to install extensions
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <header class="header" role="banner">
+    <div class="header-top">
+      <a href="https://chromewebstore.google.com/" class="logo">
+        <img src="https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg" alt="Chrome Web Store">
+        <span>Chrome Web Store</span>
+      </a>
+
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="#5f6368">
+          <path d="M20.49 19l-5.73-5.73C15.53 12.2 16 10.91 16 9.5A6.5 6.5 0 1 0 9.5 16c1.41 0 2.7-.47 3.77-1.24L19 20.49 20.49 19zM5 9.5C5 7.01 7.01 5 9.5 5S14 7.01 14 9.5 11.99 14 9.5 14 5 11.99 5 9.5z"/>
+        </svg>
+        <form id="searchForm" onsubmit="return doSearch(event)">
+          <input type="text" id="searchInput" placeholder="Search extensions and themes" autocomplete="off" aria-label="Search the Chrome Web Store">
+        </form>
+      </div>
+
+      <div class="header-right">
+        <button class="sign-in" onclick="location.href='https://chromewebstore.google.com/category/extensions'">Sign in</button>
+      </div>
+    </div>
+
+    <nav class="header-tabs" role="tablist">
+      <a href="https://chromewebstore.google.com/" role="tab">Discover</a>
+      <a href="https://chromewebstore.google.com/category/extensions" class="active" role="tab" aria-selected="true">Extensions</a>
+      <a href="https://chromewebstore.google.com/category/themes" role="tab">Themes</a>
+    </nav>
+  </header>
+
+  <main class="main">
+    <div class="title-row">
+      <div class="title-left">
+        <div class="ext-icon">
+          <img src="https://lh3.googleusercontent.com/zM_6iwPw_NFTLt3GJL2uumACv0Wj4TZS0RS7MZt1zkV9aIsJN71ekVWQc10mrMP4WhJks1512Qioiea8e9RN9FguQw=s60" alt="Solflare Wallet">
+        </div>
+        <div class="title-info">
+          <h1>Solflare Wallet</h1>
+          <div class="meta">
+            <a href="#">solflare.com</a>
+            <span class="rating">★ 4.9 (3.1K ratings)</span>
+            <span>↗ Share</span>
+          </div>
+        </div>
+      </div>
+      <button class="add-btn" onclick="openInstallModal()">Add to Chrome</button>
+    </div>
+
+    <div class="tags">
+      <span class="tag">Extension</span>
+      <span class="tag">Workflow & Planning</span>
+      <span class="tag">700,000 users</span>
+    </div>
+
+    <div class="hero">
+      <div class="carousel">
+        <button class="nav-arrow prev" onclick="changeSlide(-1)" aria-label="Previous">‹</button>
+        <div class="main-preview">
+          <img id="mainPreview" src="https://lh3.googleusercontent.com/uAikULjkwd47WLhYXNBdKthiLnUdpUwgA3ukJ3cPy_UgTXLqmBr7WtBMTjY4-4UQW-AkKeWhYTWkyJli4WztLYIgoA=s1280-w1280-h800" alt="Solflare preview">
+        </div>
+        <button class="nav-arrow next" onclick="changeSlide(1)" aria-label="Next">›</button>
+      </div>
+      <div class="thumbs" id="thumbs">
+        <div class="thumb active" data-index="0">
+          <img src="https://lh3.googleusercontent.com/uAikULjkwd47WLhYXNBdKthiLnUdpUwgA3ukJ3cPy_UgTXLqmBr7WtBMTjY4-4UQW-AkKeWhYTWkyJli4WztLYIgoA=s1280-w1280-h800" alt="Preview 1">
+        </div>
+        <div class="thumb" data-index="1">
+          <img src="https://lh3.googleusercontent.com/KYlmu7LmbCoWRn44mEAPINa_BufBeJ2p1zeGR0sa-V4Wyzyjc6jrt184CORhJVyGlk-J70Gc8ig-PhdzzevhXcCm=s1280-w1280-h800" alt="Preview 2">
+        </div>
+        <div class="thumb" data-index="2">
+          <img src="https://lh3.googleusercontent.com/gR494Br5VA_XZdCjvNnUhTFxZQL-j7c2FhgPtnWdzsneVP8cH77GlVTDC5x_2s8-OamkH8KhH29IHqYvl4eBGMlr=s1280-w1280-h800" alt="Preview 3">
+        </div>
+        <div class="thumb" data-index="3">
+          <img src="https://lh3.googleusercontent.com/mjWiTbmxJG0W9Mt7u929PDL1xMgxXzzhVMoQSkd4ZDdtzPGa6dot9kW4kzscDGsDOol_31FyTSBhD6HMEaPBlqPGgw=s1280-w1280-h800" alt="Preview 4">
+        </div>
+        <div class="thumb" data-index="4">
+          <img src="https://lh3.googleusercontent.com/3jd2WJOjR1_-WfvV6Ds1a5yDrb3FhinGpov2A-AjhDBy3Z-7Y7RzHkpyQPgYFva3spLbksa6TOWoRPbcsqScxwzo=s1280-w1280-h800" alt="Preview 5">
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const images = [
+        "https://lh3.googleusercontent.com/uAikULjkwd47WLhYXNBdKthiLnUdpUwgA3ukJ3cPy_UgTXLqmBr7WtBMTjY4-4UQW-AkKeWhYTWkyJli4WztLYIgoA=s1280-w1280-h800",
+        "https://lh3.googleusercontent.com/KYlmu7LmbCoWRn44mEAPINa_BufBeJ2p1zeGR0sa-V4Wyzyjc6jrt184CORhJVyGlk-J70Gc8ig-PhdzzevhXcCm=s1280-w1280-h800",
+        "https://lh3.googleusercontent.com/gR494Br5VA_XZdCjvNnUhTFxZQL-j7c2FhgPtnWdzsneVP8cH77GlVTDC5x_2s8-OamkH8KhH29IHqYvl4eBGMlr=s1280-w1280-h800",
+        "https://lh3.googleusercontent.com/mjWiTbmxJG0W9Mt7u929PDL1xMgxXzzhVMoQSkd4ZDdtzPGa6dot9kW4kzscDGsDOol_31FyTSBhD6HMEaPBlqPGgw=s1280-w1280-h800",
+        "https://lh3.googleusercontent.com/3jd2WJOjR1_-WfvV6Ds1a5yDrb3FhinGpov2A-AjhDBy3Z-7Y7RzHkpyQPgYFva3spLbksa6TOWoRPbcsqScxwzo=s1280-w1280-h800"
+      ];
+      let current = 0;
+      const mainImg = document.getElementById('mainPreview');
+      const thumbs = document.querySelectorAll('.thumb');
+
+      function goTo(index) {
+        if (index === current) return;
+        mainImg.classList.add('fade-out');
+        setTimeout(() => {
+          current = (index + images.length) % images.length;
+          mainImg.src = images[current];
+          mainImg.classList.remove('fade-out');
+          thumbs.forEach(t => t.classList.remove('active'));
+          thumbs[current].classList.add('active');
+        }, 180);
+      }
+
+      function changeSlide(dir) {
+        goTo(current + dir);
+      }
+
+      thumbs.forEach(thumb => {
+        thumb.addEventListener('click', () => {
+          goTo(parseInt(thumb.dataset.index));
+        });
+      });
+
+      function doSearch(e) {
+        e.preventDefault();
+        const q = document.getElementById('searchInput').value.trim();
+        if (q) {
+          location.href = 'https://chromewebstore.google.com/search/' + encodeURIComponent(q);
+        }
+        return false;
+      }
+
+      function openInstallModal() {
+        document.getElementById('installModal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeInstallModal() {
+        document.getElementById('installModal').classList.remove('open');
+        document.body.style.overflow = '';
+      }
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeInstallModal();
+      });
+    </script>
+
+    <section class="section">
+      <h2>Overview</h2>
+      <div class="overview">
+        <p><strong>The most powerful wallet on Solana, trusted by 4M+ users managing $20B+ in assets.</strong></p>
+        <p>🥇 Solflare - the Most Powerful Wallet on Solana, managing $20B+ in crypto assets and trusted by 4M+ active users.</p>
+        <p>💳 Your all-in-one wallet extension to buy, store, stake, swap crypto, and manage tokens and NFTs on Solana.</p>
+        <p>🔐 Securely explore, trade, and manage over 3 million tokens and meme coins. Easily connect to your favorite Web3 dApps and engage with NFT communities.</p>
+        <p>⭐️ Perfect for beginners and pros looking to build wealth through DeFi, staking, and trading crypto on Solana.</p>
+
+        <div class="features">
+          <div class="feature">
+            <strong>• Unbreakable security</strong>
+            <p>With Solflare’s cutting-edge defensive measures, you can experience the best of Solana with Solflare, knowing your crypto funds are always secure. With zero security issues to date, our unbreakable security system protects you as you freely explore the Solana Web3 and DeFi ecosystem.</p>
+          </div>
+          <div class="feature">
+            <strong>• Buy crypto with the best rates</strong>
+            <p>Buy coins directly through your wallet via debit/credit cards, bank transfers, or Apple and Google Pay, with another 130+ payment methods.</p>
+          </div>
+          <div class="feature">
+            <strong>• Move coins and NFTs easier than money</strong>
+            <p>Easily send funds to any Solana address or scan a QR code for instant token transfers.</p>
+          </div>
+          <div class="feature">
+            <strong>• Raise the stakes</strong>
+            <p>Staking earns you passive income on your SOL while increasing the overall stability of Solana.</p>
+          </div>
+          <div class="feature">
+            <strong>• Trade victorious</strong>
+            <p>Swap tokens for success. Effortlessly identify the most promising meme coins from over 3 million Solana coins.</p>
+          </div>
+          <div class="feature">
+            <strong>• Spot trends. Dominate the market.</strong>
+            <p>Explore trends and discover new investment opportunities in the Web3 and DeFi world.</p>
+          </div>
+          <div class="feature">
+            <strong>• Every asset under your command</strong>
+            <p>Your coins, your NFTs, your stakes, your activity. Easily manage and personalize your entire crypto portfolio from a single page.</p>
+          </div>
+          <div class="feature">
+            <strong>• One click to your favorite Solana Web3 dApps</strong>
+            <p>Easily access and interact with your favorite Solana Web3 dApps with the wallet, including Jupiter, Raydium, Pump.fun, DEX Screener, and Magic Eden.</p>
+          </div>
+          <div class="feature">
+            <strong>• Around-the-clock human support</strong>
+            <p>Our support team is available around the clock through live chat 24/7.</p>
+          </div>
+          <div class="feature">
+            <strong>• Fortified security with hardware wallet</strong>
+            <p>Securely connect your hardware wallet, like Ledger or Keystone, for top-level security.</p>
+          </div>
+          <div class="feature">
+            <strong>• Rule your NFT collections</strong>
+            <p>Solflare makes it easy to store, view, manage, and even instantly sell your Solana NFTs.</p>
+          </div>
+        </div>
+        <p style="margin-top:20px;"><em>Install Solflare today and claim your place in the Stronghold of the Free!</em></p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>4.9 out of 5</h2>
+      <p style="color:#5f6368;">3.1K ratings</p>
+    </section>
+
+    <section class="section">
+      <h2>Details</h2>
+      <dl class="details-grid">
+        <dt>Version</dt>
+        <dd>2.35.2</dd>
+        <dt>Updated</dt>
+        <dd>September 1, 2026</dd>
+        <dt>Size</dt>
+        <dd>43.55 MiB</dd>
+        <dt>Languages</dt>
+        <dd>English</dd>
+        <dt>Developer</dt>
+        <dd>Website · extension@solflare.com<br>Non-trader</dd>
+      </dl>
+    </section>
+
+    <section class="section">
+      <h2>Privacy</h2>
+      <div class="privacy">
+        <p>The developer has disclosed that it will not collect or use your data.</p>
+        <p style="margin-top:12px;"><strong>This developer declares that your data is</strong></p>
+        <ul>
+          <li>Not being sold to third parties, outside of the approved use cases</li>
+          <li>Not being used or transferred for purposes that are unrelated to the item's core functionality</li>
+          <li>Not being used or transferred to determine creditworthiness or for lending purposes</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Support</h2>
+      <p style="font-size:14px;color:#5f6368;">For help with questions, suggestions, or problems, visit the developer's support site.</p>
+    </section>
+
+    <section class="section">
+      <h2>Related</h2>
+      <div class="related">
+        <div class="related-card">
+          <div class="related-icon"></div>
+          <div>
+            <h3>UniSat Wallet</h3>
+            <p>Inscribe and store your inscriptions in the world's first open-source Ordinals Chrome wallet!</p>
+          </div>
+        </div>
+        <div class="related-card">
+          <div class="related-icon"></div>
+          <div>
+            <h3>Sender Wallet</h3>
+            <p>Sender is a browser extension crypto wallet.</p>
+          </div>
+        </div>
+        <div class="related-card">
+          <div class="related-icon"></div>
+          <div>
+            <h3>Magic Eden Wallet</h3>
+            <p>A digital wallet for cross-chain collectors.</p>
+          </div>
+        </div>
+        <div class="related-card">
+          <div class="related-icon"></div>
+          <div>
+            <h3>Zerion Wallet</h3>
+            <p>Trade, track, and explore crypto on Solana, Ethereum and 50+ chains.</p>
+          </div>
+        </div>
+        <div class="related-card">
+          <div class="related-icon"></div>
+          <div>
+            <h3>Backpack</h3>
+            <p>A next level crypto wallet for Solana, Ethereum, Monad, Sui, and more.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Local private sandbox copy · for testing & learning only · no connection to Google or Solflare
+  </footer>
+</body>
+</html>
